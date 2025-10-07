@@ -8,6 +8,7 @@ from django.urls import reverse
 from .models import *
 
 
+# Forms
 class NewListingForm(forms.Form):
     """Form for creating a new listing. Extends forms.Form.
     
@@ -43,11 +44,15 @@ class NewListingForm(forms.Form):
     category = forms.CharField(label="Category")
 
 
+# Main view
 def index(request):
-    return render(request, "auctions/index.html")
+    """Render the main page displaying all active auction listings."""
+    return render(request, "auctions/index.html", {
+        "listings": Listing.objects.all()
+    })
 
 
-# auth
+# Auth
 def login_view(request):
     if request.method == "POST":
 
@@ -100,7 +105,7 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
-# listings
+# Listings
 def new(request):
     """Handle creation of new auction listings.
 
