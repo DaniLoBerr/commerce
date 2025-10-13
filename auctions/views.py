@@ -113,8 +113,8 @@ def new(request):
         - Validates and processes form data.
         - Creates a new category if it does not exist.
         - Saves the new listing.
-        - Renders the index page with a success message,
-            or with an error message if saving fails.
+        - Renders the new listing page with a success message,
+            or the index page with an error message if saving fails.
 
     On GET:
         - Renders a page with a listing creation form.
@@ -154,13 +154,28 @@ def new(request):
                 return render(request, "auctions/index.html", {
                     "message": "Listing could not be saved"
                 })
-            
-        #TODO: render the new listing page and update docstring
-        return render(request, "auctions/index.html", {
+
+        # Render the new listing page with a success message
+        return render(request, "auctions/listing.html", {
                     "message": "Listing published successfully"
                 })
 
     # If the view is accessed via GET
     return render(request, "auctions/new.html", {
         "form": NewListingForm()
+    })
+
+
+def listing(request, id):
+    """Render the page of a particular listing.
+    
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :param id: The id of the listing to display.
+    :type id: int
+    :return: The HttpResponse with rendered listing page.
+    :rtype: HttpResponse
+    """
+    return render(request, "auctions/listing.html", {
+        "listing": Listing.objects.get(pk=id),
     })
