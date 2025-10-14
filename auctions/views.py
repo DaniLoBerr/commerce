@@ -44,16 +44,27 @@ class NewListingForm(forms.Form):
     category = forms.CharField(label="Category")
 
 
-# Main view
-def index(request):
-    """Render the main page displaying all active auction listings."""
-    return render(request, "auctions/index.html", {
-        "listings": Listing.objects.all()
-    })
-
-
 # Auth
 def login_view(request):
+    """Handle user login.
+    
+    On POST:
+        - Retrieve the username and password from the form and attempt
+        to authenticate the user.
+        - If authentication is successful, log the user in and
+        redirect them to the index page.
+        - If authentication fails, re-render the login page with an
+        error message.
+    
+    ON GET:
+        - Render the login form page.
+
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :return: HttpResponse redirecting to index page if login is
+        successful, or rendering login page with error message.
+    :rtype: HttpResponse
+    """
     if request.method == "POST":
 
         # Attempt to sign user in
@@ -74,11 +85,44 @@ def login_view(request):
 
 
 def logout_view(request):
+    """Handle user logout.
+    
+    Call the logout function to log out the user associated with the
+    request object.
+
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :return: HttpResponse redirecting to index page.
+    :rtype: HttpResponse
+    """
     logout(request)
     return HttpResponseRedirect(reverse("index"))
 
 
 def register(request):
+    """Handle user registration to the website.
+    
+    On POST:
+        - Retrieve the username, email, password and confirmation from
+        the registration form.
+        - Ensure the password matches the confirmation; if not,
+        re-render the registration form with an error massage.
+        - Attempt to create a user object and save it to the database; 
+        if the username is already taken, re-render the registration
+        form with an error message.
+        - If registration is successful, log in the user and redirect to
+        the index page.  
+
+    On GET:
+        - Render a page with the user registration form.
+
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :return: HttpResponse that either render the registration form
+        (on GET, or in case errors) or redirects to the index page
+        (on successful registration).
+    :rtype: HttpResponse
+    """
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
@@ -101,23 +145,43 @@ def register(request):
             })
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
-    else:
-        return render(request, "auctions/register.html")
+
+    return render(request, "auctions/register.html")
 
 
-# Listings
+# Auction listings
+def index(request):
+    """Render the main page displaying all active auction listings.
+    
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :return: The HttpResponse containing the rendered index page.
+    :rtype: HttpResponse
+    """
+    return render(request, "auctions/index.html", {
+        "listings": Listing.objects.all()
+    })
+
+
 def new(request):
     """Handle creation of new auction listings.
 
     On POST:
-        - Validates and processes form data.
-        - Creates a new category if it does not exist.
-        - Saves the new listing.
-        - Renders the new listing page with a success message,
+        - Validate and process form data.
+        - Create a new category if it does not exist.
+        - Save the new listing.
+        - Render the new listing page with a success message,
             or the index page with an error message if saving fails.
 
     On GET:
-        - Renders a page with a listing creation form.
+        - Render a page with a listing creation form.
+
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :return: HttpResponse that either render the new listing form on
+        GET, the index page in case error, or the new listing page on
+        successful action.
+    :rtype: HttpResponse
     """
     if request.method == "POST":
 
