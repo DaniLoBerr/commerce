@@ -242,4 +242,59 @@ def listing(request, id):
     """
     return render(request, "auctions/listing.html", {
         "listing": Listing.objects.get(pk=id),
+        "watchlist": Watchlist.objects.filter(user_id=request.user.id),
     })
+
+
+def watchlist(request):
+    """Add or remove a listing from a user's watchlist
+    
+    Handle request to add or remove listings from a user's watchlist
+    when the corresponding button is clicked on a listing page.
+
+    Retrieve the user's id and the listing's id from the GET parameters.
+    If the action is "add", add the listing to the user's watchlist.
+    Otherwise, remove the listing from the user's watchlist. Raise an
+    IntegrityError if these actions fail and display an error message.
+    Redirect to the listing page in all cases.
+
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :return: HttpResponse redirecting to the listing page.
+    :rtype: HttpResponse
+    """
+    # Get form parameters
+    user_id = request.GET["user_id"]
+    listing_id = request.GET["listing_id"]
+
+    # Get objects from database
+    user = User.objects.get(pk=user_id)
+    listing = Listing.objects.get(pk=listing_id)
+    
+    if request.GET["action"] == "add":
+        # Add listing to user's watchlist
+        try:
+            watchlist = Watchlist(
+                user=user,
+                listing=listing,
+            )
+            watchlist.save()
+        except IntegrityError:
+            message = "Listing could not be saved on your watchlist."
+            return HttpResponseRedirect(
+                reverse('listing', args=[listing_id, message])
+            )
+    else:
+        # Remove listing from user's watchlist
+        try:
+            entry = Watchlist.objects.filter(
+                user_id=user_id, listing_id=listing_id
+            )
+            entry.delete()
+        except IntegrityError:
+            message = "Listing could not be removed from your watchlist."
+            return HttpResponseRedirect(
+                reverse('listing', args=[listing_id, message])
+            )
+
+    return HttpResponseRedirect(reverse('listing', args=[listing_id]))

@@ -1,5 +1,21 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    TODO
+    <header>
+        <h2>Listing: {{ listing.title }}</h2>
+    </header>
+
+    <div class="watchlist">
+        <form action="{% url 'watchlist' %}" method="get">
+            <input type="hidden" name="user_id" value="{{ user.id }}">
+            <input type="hidden" name="listing_id" value="{{ listing.id }}">
+            {% if user.is_authenticated and watchlist %}
+                <input type="hidden" name="action" value="remove">
+                <button type="submit" class="btn btn-danger">Remove from Watchlist</button>
+            {% else %}
+                <input type="hidden" name="action" value="add">
+                <button type="submit" class="btn btn-success">Add to Watchlist</button>
+            {% endif %}
+        </form>
+    </div>
 {% endblock %}

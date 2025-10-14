@@ -174,3 +174,36 @@ class Comment(models.Model):
         """
         return f"Comment by {self.user} on {self.listing}"
 
+
+class Watchlist(models.Model):
+    """Represent a user's watchlist entry for a specific listing.
+    
+    :attr user: The user who added the listing to their watchlist.
+    :type user: ForeignKey
+    :attr listing: The listing that the user added to their watchlist.
+    :type listing: ForeignKey
+    :attr created_at: Timestamp when the watchlist entry was added,
+        set automatically.
+    :type created_at: DateTimeField
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
+    listing = models.ForeignKey(
+        Listing,
+        on_delete=models.CASCADE,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+    def __str__(self):
+        """Return a string containing the details of a listing added to
+        a user's watchlist at a particular timestamp.
+        
+        :return: A string in the format '{listing} added to {user}'s
+            watchlist on {timestamp}"'.
+        :rtype: str
+        """
+        return f"{self.listing} added to {self.user}'s watchlist on \
+                {self.created_at}"
