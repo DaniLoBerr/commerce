@@ -18,4 +18,22 @@
             {% endif %}
         </form>
     </div>
+
+    <figure class="listing-img-container">
+        <img class="listing-img rounded" src="{{ listing.image.url }}" alt="Image of {{ listing.title }}">
+    </figure>
+
+    <div class="description">
+        <h4>Description:</h4>
+        <p>{{ listing.description }}</p>
+    </div>
+
+    <div class="details">
+        <h4>Details</h4>
+        <ul>
+            <li><span class="fw-bold">Category:</span> {{ listing.category }}</li>
+            <li><span class="fw-bold">Created:</span> {{ listing.creation_date }}</li>
+            <li><span class="fw-bold">Listed by:</span> {{ listing.owner }}</li>
+        </ul>
+    </div>
 {% endblock %}
