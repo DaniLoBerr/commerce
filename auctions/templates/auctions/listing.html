@@ -1,6 +1,12 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
+    {% if message %}
+        <div class="alert alert-primary" role="alert">
+            {{ message }}
+        </div>
+    {% endif %}
+
     <header>
         <h2>Listing: {{ listing.title }}</h2>
     </header>
