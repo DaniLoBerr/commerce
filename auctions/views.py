@@ -1,3 +1,5 @@
+import pdb
+
 from django import forms
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
@@ -242,7 +244,10 @@ def listing(request, id):
     """
     return render(request, "auctions/listing.html", {
         "listing": Listing.objects.get(pk=id),
-        "watchlist": Watchlist.objects.filter(user_id=request.user.id),
+        "watchlist": Watchlist.objects.filter(
+            listing_id=id,
+            user_id=request.user.id,
+        ),
     })
 
 
