@@ -1,6 +1,5 @@
-import pdb
-
 from django import forms
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -79,11 +78,10 @@ def login_view(request):
             login(request, user)
             return HttpResponseRedirect(reverse("index"))
         else:
-            return render(request, "auctions/login.html", {
-                "message": "Invalid username and/or password."
-            })
-    else:
-        return render(request, "auctions/login.html")
+            messages.error(request, "Invalid username and/or password.")
+            return render(request, "auctions/login.html")
+
+    return render(request, "auctions/login.html")
 
 
 def logout_view(request):
@@ -113,7 +111,7 @@ def register(request):
         if the username is already taken, re-render the registration
         form with an error message.
         - If registration is successful, log in the user and redirect to
-        the index page.  
+        the index page with a success message.
 
     On GET:
         - Render a page with the user registration form.
@@ -133,19 +131,18 @@ def register(request):
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
         if password != confirmation:
-            return render(request, "auctions/register.html", {
-                "message": "Passwords must match."
-            })
+            messages.error(request, "Passwords must match.")
+            return render(request, "auctions/register.html")
 
         # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
         except IntegrityError:
-            return render(request, "auctions/register.html", {
-                "message": "Username already taken."
-            })
+            messages.error(request, "Username already taken.")
+            return render(request, "auctions/register.html")
         login(request, user)
+        messages.success(request, "Registration completed successfully.")
         return HttpResponseRedirect(reverse("index"))
 
     return render(request, "auctions/register.html")
@@ -186,7 +183,6 @@ def new(request):
     :rtype: HttpResponse
     """
     if request.method == "POST":
-
         # Bind form data and files
         form = NewListingForm(request.POST, request.FILES)
 
@@ -217,14 +213,12 @@ def new(request):
                 )
                 listing.save()
             except IntegrityError:
-                return render(request, "auctions/index.html", {
-                    "message": "Listing could not be saved"
-                })
+                messages.error(request, "Listing could not be saved.")
+                return render(request, "auctions/index.html")
 
         # Render the new listing page with a success message
-        return render(request, "auctions/listing.html", {
-                    "message": "Listing published successfully"
-                })
+        messages.success(request, "Listing published successfully.")
+        return render(request, "auctions/listing.html")
 
     # If the view is accessed via GET
     return render(request, "auctions/new.html", {
@@ -284,10 +278,15 @@ def watchlist(request):
                 listing=listing,
             )
             watchlist.save()
+            messages.success(
+                request, "Listing saved on your watchlist successfully."
+            )
         except IntegrityError:
-            message = "Listing could not be saved on your watchlist."
+            messages.error(
+                request, "Listing could not be saved on your watchlist."
+            )
             return HttpResponseRedirect(
-                reverse('listing', args=[listing_id, message])
+                reverse('listing', args=[listing_id])
             )
     else:
         # Remove listing from user's watchlist
@@ -296,10 +295,15 @@ def watchlist(request):
                 user_id=user_id, listing_id=listing_id
             )
             entry.delete()
+            messages.success(
+                request, "Listing removed from your watchlist successfully."
+            )
         except IntegrityError:
-            message = "Listing could not be removed from your watchlist."
+            messages.error(
+                request, "Listing could not be removed from your watchlist."
+            )
             return HttpResponseRedirect(
-                reverse('listing', args=[listing_id, message])
+                reverse('listing', args=[listing_id])
             )
 
     return HttpResponseRedirect(reverse('listing', args=[listing_id]))
