@@ -28,6 +28,19 @@
         <p>{{ listing.description }}</p>
     </div>
 
+    <div class="bids mb-4">
+        <h2>${{ last_bid }}</h2>
+        <!-- latest bid --> <!-- close listing (auth, owner) --> <!-- bid form (auth) -->
+            <!-- listing winner (auth, user) -->
+        <!-- creation bid -->
+        <small class="mb-2">{{ bids }} bid(s) so far.</small>
+        <form action="{% url 'bid' listing.id %}" method="post">
+            {% csrf_token %}
+            {{ bid_form }}
+            <input class="btn btn-primary" type="submit" value="Place Bid">
+        </form>
+    </div>
+
     <div class="details">
         <h4>Details</h4>
         <ul>

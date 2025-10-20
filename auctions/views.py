@@ -45,6 +45,26 @@ class NewListingForm(forms.Form):
     category = forms.CharField(label="Category")
 
 
+class NewBidForm(forms.Form):
+    """Form for placing a new bid on a listing. Extends forms.Form.
+    
+    :attr bid: The bid amount, displayed as a positive decimal number up
+        to 10 digits and 2 decimal places with no label and a "Bid"
+        placeholder.
+    :type bid: DecimalField
+    """
+    bid = forms.DecimalField(
+        decimal_places=2,
+        label=False,
+        max_digits=10,
+        min_value=0,
+        widget=forms.NumberInput(attrs={
+            "placeholder": "Bid",
+            "class": "form-control mb-2",
+        })
+    )
+
+
 # Auth
 def login_view(request):
     """Handle user login.
@@ -162,6 +182,67 @@ def index(request):
     })
 
 
+def bid(request, listing_id):
+    """Handle placing a new bid to a specific listing.
+    
+    Retrieve the listing object by its id, validate the bid form
+    submitted by the user, and save the new bid if it meets the required
+    conditions. The bid is accepted if:
+    - If it's higher than the current biggest bid, or
+    - There are no existing bids and the bid is at least equal to the
+    listing's price.
+
+    Depending on the outcome, success or error messages are displayed,
+    and the user is redirected back to the listing page.
+
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :param listing_id: The id of the listing the user is bidding on.
+    :type listing_id: int
+    :return: An HttpResponseRedirect to the listing page.
+    :rtype: HttpResponseRedirect
+    """
+    # Retrieve the listing the user is bidding on
+    listing = Listing.objects.get(pk=listing_id)
+
+    # Instantiate and validate the bid form with request data
+    bid_form = NewBidForm(request.POST)
+    if bid_form.is_valid():
+        cleaned_bid = bid_form.cleaned_data["bid"]
+
+        # Attempt to fetch the most recent bid for the listing
+        try:
+            last_bid = (
+                Bid.objects
+                    .filter(listing_id=listing_id)
+                    .latest("datetime")
+                    .value
+            )
+        except Bid.DoesNotExist:
+            last_bid = None
+
+        # Determine if the new bid is valid based on existing bids or listing
+        # price
+        if ((last_bid and cleaned_bid > last_bid)
+        or (last_bid is None and cleaned_bid >= listing.price)):
+            try:
+                # Save the new valid bid
+                new_bid = Bid(
+                    value=cleaned_bid,
+                    user=request.user,
+                    listing=listing,
+                )
+                new_bid.save()
+                messages.success(request, "Bid placed successfully.")
+            except IntegrityError:
+                messages.error(request, "Bid could not be placed.")
+        else:
+            messages.error(request, "Bid is not valid.")
+
+    # Redirect the user back to the listing page
+    return HttpResponseRedirect(reverse("listing", args=[listing_id]))
+
+
 def new(request):
     """Handle creation of new auction listings.
 
@@ -218,7 +299,7 @@ def new(request):
 
         # Render the new listing page with a success message
         messages.success(request, "Listing published successfully.")
-        return render(request, "auctions/listing.html")
+        return HttpResponseRedirect(reverse("listing", args=[listing.id]))
 
     # If the view is accessed via GET
     return render(request, "auctions/new.html", {
@@ -229,15 +310,33 @@ def new(request):
 def listing(request, id):
     """Render the page of a particular listing.
     
+    Fetch the listing object, its related bids, and determines the
+    latest bid value (or the initial listing price if no bids exist).
+    Render the listing page with all necessary context data for display.
+
     :param request: The HTTP request object.
     :type request: HttpRequest
     :param id: The id of the listing to display.
     :type id: int
-    :return: The HttpResponse with rendered listing page.
+    :return: The HttpResponse rendering the listing page.
     :rtype: HttpResponse
     """
+    # Retrieve the selected listing object and all its related bids
+    listing = Listing.objects.get(pk=id)
+    listing_bids = Bid.objects.filter(listing_id=id)
+    
+    # Retrieve the value of the last listing bid or the listing price if
+    # It has no related bids
+    try:
+        last_bid = listing_bids.latest("datetime").value
+    except Bid.DoesNotExist:
+        last_bid = listing.price
+
     return render(request, "auctions/listing.html", {
-        "listing": Listing.objects.get(pk=id),
+        "bids": len(listing_bids),
+        "bid_form": NewBidForm(),
+        "last_bid": last_bid,
+        "listing": listing,
         "watchlist": Watchlist.objects.filter(
             listing_id=id,
             user_id=request.user.id,
@@ -285,9 +384,6 @@ def watchlist(request):
             messages.error(
                 request, "Listing could not be saved on your watchlist."
             )
-            return HttpResponseRedirect(
-                reverse('listing', args=[listing_id])
-            )
     else:
         # Remove listing from user's watchlist
         try:
@@ -301,9 +397,6 @@ def watchlist(request):
         except IntegrityError:
             messages.error(
                 request, "Listing could not be removed from your watchlist."
-            )
-            return HttpResponseRedirect(
-                reverse('listing', args=[listing_id])
             )
 
     return HttpResponseRedirect(reverse('listing', args=[listing_id]))
