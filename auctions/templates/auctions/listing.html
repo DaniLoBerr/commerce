@@ -1,11 +1,11 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <header>
+    <header class="mb-2">
         <h2>Listing: {{ listing.title }}</h2>
     </header>
 
-    <div class="watchlist">
+    <div class="watchlist mb-2">
         <form action="{% url 'watchlist' %}" method="get">
             <input type="hidden" name="user_id" value="{{ user.id }}">
             <input type="hidden" name="listing_id" value="{{ listing.id }}">
@@ -19,11 +19,11 @@
         </form>
     </div>
 
-    <figure class="listing-img-container">
+    <figure class="listing-img-container mb-2">
         <img class="listing-img rounded" src="{{ listing.image.url }}" alt="Image of {{ listing.title }}">
     </figure>
 
-    <div class="description">
+    <div class="description mb-2">
         <h4>Description:</h4>
         <p>{{ listing.description }}</p>
     </div>
@@ -41,7 +41,7 @@
         </form>
     </div>
 
-    <div class="details">
+    <div class="details mb-2">
         <h4>Details</h4>
         <ul>
             <li><span class="fw-bold">Category:</span> {{ listing.category }}</li>
