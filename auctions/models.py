@@ -30,7 +30,7 @@ class User(AbstractUser):
             'first_name last_name'.
         :rtype: str
         """
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.username}"
 
 
 class Category(models.Model):
