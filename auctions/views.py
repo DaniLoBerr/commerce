@@ -178,7 +178,7 @@ def index(request):
     :rtype: HttpResponse
     """
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.all()
+        "listings": Listing.objects.prefetch_related("bids").all()
     })
 
 
