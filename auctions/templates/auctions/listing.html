@@ -33,7 +33,11 @@
         <!-- latest bid --> <!-- close listing (auth, owner) --> <!-- bid form (auth) -->
             <!-- listing winner (auth, user) -->
         <!-- creation bid -->
-        <small class="mb-2">{{ bids }} bid(s) so far.</small>
+        <small class="mb-2">{{ bids }} bid(s) so far. 
+            {% if user.id == listing.bids.last.user_id %}
+                Your bid is the current bid.
+            {% endif %}
+        </small>
         <form action="{% url 'bid' listing.id %}" method="post">
             {% csrf_token %}
             {{ bid_form }}
