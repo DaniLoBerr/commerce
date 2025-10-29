@@ -30,19 +30,27 @@
 
     <div class="bids mb-4">
         <h2>${{ last_bid }}</h2>
-        <!-- latest bid --> <!-- close listing (auth, owner) --> <!-- bid form (auth) -->
-            <!-- listing winner (auth, user) -->
-        <!-- creation bid -->
-        <small class="mb-2">{{ bids }} bid(s) so far. 
-            {% if user.id == listing.bids.last.user_id %}
-                Your bid is the current bid.
-            {% endif %}
-        </small>
-        <form action="{% url 'bid' listing.id %}" method="post">
-            {% csrf_token %}
-            {{ bid_form }}
-            <input class="btn btn-primary" type="submit" value="Place Bid">
-        </form>
+        {% if listing.winner %}
+            <div class="alert alert-primary" role="alert">
+                This auction is closed and {{ listing.winner.username }} is the winner.
+            </div>
+        {% elif user == listing.owner %}
+            <form action="{% url 'close' %}" method="get">
+                <input type="hidden" name="listing_id" value="{{ listing.id }}">
+                <input class="btn btn-warning" type="submit" value="Close Auction">
+            </form>
+        {% else %}
+            <small class="mb-2">{{ bids }} bid(s) so far. 
+                {% if user.id == listing.bids.last.user_id %}
+                    Your bid is the current bid.
+                {% endif %}
+            </small>
+            <form action="{% url 'bid' listing.id %}" method="post">
+                {% csrf_token %}
+                {{ bid_form }}
+                <input class="btn btn-primary" type="submit" value="Place Bid">
+            </form>
+        {% endif %}
     </div>
 
     <div class="details mb-2">

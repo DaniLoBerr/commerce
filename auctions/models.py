@@ -65,6 +65,12 @@ class Listing(models.Model):
     :attr creation_date: Timestamp indicating when the listing was
         created, set automatically.
     :type creation_date: DateTimeField
+    :attr is_active: Indicates whether the listing is active (True) or
+        closed (False).
+    :type is_active: BooleanField
+    :attr winner: The user who placed the final bid; set to null if
+        the user is deleted.
+    :type winner: ForeignKey
     :attr category: The category to which this listing belongs.
         Deleting a category will delete all its associated listings.
     :type category: ForeignKey
@@ -77,6 +83,13 @@ class Listing(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     creation_date = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    winner = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,

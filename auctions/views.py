@@ -243,6 +243,78 @@ def bid(request, listing_id):
     return HttpResponseRedirect(reverse("listing", args=[listing_id]))
 
 
+def close(request):
+    """Close a listing auction by its owner.
+
+    Marks the listing as inactive and assigns the user with the most
+    recent bid as the winner. Updates the database accordingly and
+    provides a success or error message to the user.
+
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :return: An HttpResponseRedirect to the listing page.
+    :rtype: HttpResponseRedirect
+    """
+    # Retrieve the listing id from the query parameters
+    listing_id = request.GET["listing_id"]
+
+    # Get the listing object from the database
+    listing = Listing.objects.get(pk=listing_id)
+
+    # Attempt to assign the latest bidder as the winner and close the listing
+    try:
+        listing.winner = (
+            Bid.objects
+                .filter(listing_id=listing_id)
+                .latest("datetime")
+                .user
+        )
+        listing.is_active = False
+        listing.save()
+        messages.success(request, "Auction closed successfully")
+    except (IntegrityError, Bid.DoesNotExist):
+        messages.error(request, "Auction could not be closed")
+    
+    return HttpResponseRedirect(reverse("listing", args=[listing_id]))
+
+
+def listing(request, id):
+    """Render the page of a particular listing.
+    
+    Fetch the listing object, its related bids, and determines the
+    latest bid value (or the initial listing price if no bids exist).
+    Render the listing page with all necessary context data for display.
+
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :param id: The id of the listing to display.
+    :type id: int
+    :return: The HttpResponse rendering the listing page.
+    :rtype: HttpResponse
+    """
+    # Retrieve the selected listing object and all its related bids
+    listing = Listing.objects.get(pk=id)
+    listing_bids = Bid.objects.filter(listing_id=id)
+    
+    # Retrieve the value of the last listing bid or the listing price if
+    # It has no related bids
+    try:
+        last_bid = listing_bids.latest("datetime").value
+    except Bid.DoesNotExist:
+        last_bid = listing.price
+
+    return render(request, "auctions/listing.html", {
+        "bids": len(listing_bids),
+        "bid_form": NewBidForm(),
+        "last_bid": last_bid,
+        "listing": listing,
+        "watchlist": Watchlist.objects.filter(
+            listing_id=id,
+            user_id=request.user.id,
+        ),
+    })
+
+
 def new(request):
     """Handle creation of new auction listings.
 
@@ -304,43 +376,6 @@ def new(request):
     # If the view is accessed via GET
     return render(request, "auctions/new.html", {
         "form": NewListingForm()
-    })
-
-
-def listing(request, id):
-    """Render the page of a particular listing.
-    
-    Fetch the listing object, its related bids, and determines the
-    latest bid value (or the initial listing price if no bids exist).
-    Render the listing page with all necessary context data for display.
-
-    :param request: The HTTP request object.
-    :type request: HttpRequest
-    :param id: The id of the listing to display.
-    :type id: int
-    :return: The HttpResponse rendering the listing page.
-    :rtype: HttpResponse
-    """
-    # Retrieve the selected listing object and all its related bids
-    listing = Listing.objects.get(pk=id)
-    listing_bids = Bid.objects.filter(listing_id=id)
-    
-    # Retrieve the value of the last listing bid or the listing price if
-    # It has no related bids
-    try:
-        last_bid = listing_bids.latest("datetime").value
-    except Bid.DoesNotExist:
-        last_bid = listing.price
-
-    return render(request, "auctions/listing.html", {
-        "bids": len(listing_bids),
-        "bid_form": NewBidForm(),
-        "last_bid": last_bid,
-        "listing": listing,
-        "watchlist": Watchlist.objects.filter(
-            listing_id=id,
-            user_id=request.user.id,
-        ),
     })
 
 
