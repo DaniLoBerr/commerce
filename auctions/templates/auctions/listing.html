@@ -32,7 +32,7 @@
         <h2>${{ last_bid }}</h2>
         {% if listing.winner %}
             <div class="alert alert-primary" role="alert">
-                This auction is closed and {{ listing.winner.username }} is the winner.
+                This auction is closed and <span class="fw-bold">{{ listing.winner.username }}</span> is the winner.
             </div>
         {% elif user == listing.owner %}
             <form action="{% url 'close' %}" method="get">
