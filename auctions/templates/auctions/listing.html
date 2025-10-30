@@ -5,19 +5,21 @@
         <h2>Listing: {{ listing.title }}</h2>
     </header>
 
-    <div class="watchlist mb-2">
-        <form action="{% url 'watchlist' %}" method="get">
-            <input type="hidden" name="user_id" value="{{ user.id }}">
-            <input type="hidden" name="listing_id" value="{{ listing.id }}">
-            {% if user.is_authenticated and watchlist %}
-                <input type="hidden" name="action" value="remove">
-                <button type="submit" class="btn btn-danger">Remove from Watchlist</button>
-            {% else %}
-                <input type="hidden" name="action" value="add">
-                <button type="submit" class="btn btn-success">Add to Watchlist</button>
-            {% endif %}
-        </form>
-    </div>
+    {% if not listing.winner %}
+        <div class="watchlist mb-2">
+            <form action="{% url 'watchlist' %}" method="get">
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <input type="hidden" name="listing_id" value="{{ listing.id }}">
+                {% if user.is_authenticated and watchlist %}
+                    <input type="hidden" name="action" value="remove">
+                    <button type="submit" class="btn btn-danger">Remove from Watchlist</button>
+                {% else %}
+                    <input type="hidden" name="action" value="add">
+                    <button type="submit" class="btn btn-success">Add to Watchlist</button>
+                {% endif %}
+            </form>
+        </div>
+    {% endif %}
 
     <figure class="listing-img-container mb-2">
         <img class="listing-img rounded" src="{{ listing.image.url }}" alt="Image of {{ listing.title }}">
