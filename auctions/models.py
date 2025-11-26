@@ -154,8 +154,10 @@ class Bid(models.Model):
 class Comment(models.Model):
     """Represent a comment made by a user on a listing.
     
-    :attr comment: The text content of the comment.
-    :type comment: TextField
+    :attr title: The title of the comment, up to 100 characters.
+    :type title: CharField
+    :attr message: The text content of the comment.
+    :type message: TextField
     :attr datetime: Timestamp when the comment was created, set
         automatically.
     :type datetime: DateTimeField
@@ -166,7 +168,11 @@ class Comment(models.Model):
         removes their comments.
     :type: listing: ForeignKey
     """
-    comment = models.TextField()
+    title = models.CharField(
+        default=False,
+        max_length=100,
+    )
+    message = models.TextField(default=False)
     datetime = models.DateTimeField(auto_now_add=True)
     listing = models.ForeignKey(
         Listing,
