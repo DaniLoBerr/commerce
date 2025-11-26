@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -10,8 +10,48 @@ from .models import *
 
 
 # Forms
+class NewBidForm(forms.Form):
+    """Form for placing a new bid on a listing.
+    
+    :attr bid: The bid amount, displayed as a positive decimal number up
+        to 10 digits and 2 decimal places with no label and a "Bid"
+        placeholder.
+    :type bid: DecimalField
+    """
+    bid = forms.DecimalField(
+        decimal_places=2,
+        label=False,
+        max_digits=10,
+        min_value=0,
+        widget=forms.NumberInput(attrs={
+            "placeholder": "Bid",
+            "class": "form-control mb-2",
+        })
+    )
+
+
+class NewCommentForm(forms.Form):
+    """Form for adding a new comment on a listing page.
+    
+    :attr title: The title of the comment, displayed as a single-line
+        text input.
+    :type title: CharField
+    :attr message: The body of the comment, displayed as a multi-line
+        textarea.
+    :type message: CharField
+    """
+    title = forms.CharField(
+        label="Title",
+        max_length=100,
+    )
+    message = forms.CharField(
+        label="Your comment",
+        widget=forms.Textarea
+    )
+
+
 class NewListingForm(forms.Form):
-    """Form for creating a new listing. Extends forms.Form.
+    """Form for creating a new listing.
     
     :attr title: The title of the listing, displayed as a single-line
         text input with a "Title" label.
@@ -43,26 +83,6 @@ class NewListingForm(forms.Form):
     )
     image = forms.ImageField(label="Listing image")
     category = forms.CharField(label="Category")
-
-
-class NewBidForm(forms.Form):
-    """Form for placing a new bid on a listing. Extends forms.Form.
-    
-    :attr bid: The bid amount, displayed as a positive decimal number up
-        to 10 digits and 2 decimal places with no label and a "Bid"
-        placeholder.
-    :type bid: DecimalField
-    """
-    bid = forms.DecimalField(
-        decimal_places=2,
-        label=False,
-        max_digits=10,
-        min_value=0,
-        widget=forms.NumberInput(attrs={
-            "placeholder": "Bid",
-            "class": "form-control mb-2",
-        })
-    )
 
 
 # Auth
