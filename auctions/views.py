@@ -369,6 +369,8 @@ def listing(request, id):
     return render(request, "auctions/listing.html", {
         "bids": len(listing_bids),
         "bid_form": NewBidForm(),
+        "comments": Comment.objects.filter(listing_id=id),
+        "comment_form": NewCommentForm(),
         "last_bid": last_bid,
         "listing": listing,
         "watchlist": Watchlist.objects.filter(
