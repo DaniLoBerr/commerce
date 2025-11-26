@@ -1,4 +1,5 @@
 {% extends "auctions/layout.html" %}
+{% load crispy_forms_tags %}
 
 {% block body %}
     <header class="mb-2">
@@ -66,5 +67,35 @@
             <li><span class="fw-bold">Created:</span> {{ listing.creation_date }}</li>
             <li><span class="fw-bold">Listed by:</span> {{ listing.owner }}</li>
         </ul>
+    </div>
+
+    <div class="comments mb-2">
+        <h4>Comments</h4>
+        <div class="new-comment mb-2">
+            {% if user.is_anonymous %}
+                <div>
+                    <a href="{% url 'login' %}">Log in</a> to place a comment. No account? <a href="{% url 'register' %}">Register</a>.
+                </div>
+            {% else %}
+                <form action="{% url 'comment' listing.id %}" method="post">
+                    {% csrf_token %}
+                    {{ comment_form | crispy }}
+                    <input class="btn btn-primary" type="submit" value="Place Comment">
+                </form>
+            {% endif %}
+        </div>
+        
+        <div class="user-comments pb-2">
+            {% if comments %}
+                {% for comment in comments %}
+                    <hr>
+                    <h6>{{ comment.user.username }} - {{ comment.title }}</h6>
+                    <p>{{ comment.message }}</p>
+                    <small class="fst-italic">{{ comment.datetime }}</small>
+                {% endfor %}
+            {% else %}
+                <p>This listing has no comments yet.</p>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}
