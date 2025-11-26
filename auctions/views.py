@@ -298,6 +298,49 @@ def close(request):
     return HttpResponseRedirect(reverse("listing", args=[listing_id]))
 
 
+def comment(request, listing_id):
+    """Handle placing a new comment to a specific listing.
+    
+    Retrieve the listing object by its id, validate the comment form
+    submitted by the user, and save the new comment.
+
+    Depending on the outcome, success or error messages are displayed,
+    and the user is redirected back to the listing page.
+
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :param listing_id: The id of the listing the user is commenting on.
+    :type listing_id: int
+    :return: An HttpResponseRedirect to the listing page.
+    :rtype: HttpResponseRedirect
+    """
+    # Retrieve the listing the user is commenting on
+    listing = Listing.objects.get(pk=listing_id)
+
+    # Instantiate and validate the comment form with request data
+    comment_form = NewCommentForm(request.POST)
+    if comment_form.is_valid():
+        cleaned_title = comment_form.cleaned_data["title"]
+        cleaned_message = comment_form.cleaned_data["message"]
+
+        try:
+            # Save the new comment
+            new_comment = Comment(
+                title=cleaned_title,
+                message=cleaned_message,
+                listing=listing,
+                user=request.user,
+            )
+            new_comment.save()
+            messages.success(request, "Comment placed successfully.")
+        except IntegrityError:
+            messages.error(request, "Comment could not be placed.")
+    else:
+        messages.error(request, "Comment is not valid.")
+    
+    return HttpResponseRedirect(reverse('listing', args=[listing_id]))
+
+
 def listing(request, id):
     """Render the page of a particular listing.
     
