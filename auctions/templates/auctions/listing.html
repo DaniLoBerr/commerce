@@ -6,7 +6,7 @@
         <h2>Listing: {{ listing.title }}</h2>
     </header>
 
-    {% if not listing.winner and not user.is_anonymous %}
+    {% if listing.is_active and not user.is_anonymous %}
         <div class="watchlist mb-2">
             <form action="{% url 'watchlist' %}" method="get">
                 <input type="hidden" name="user_id" value="{{ user.id }}">
@@ -36,6 +36,10 @@
         {% if listing.winner %}
             <div class="alert alert-primary" role="alert">
                 This auction is closed and <span class="fw-bold">{{ listing.winner.username }}</span> is the winner.
+            </div>
+        {% elif not listing.is_active %}
+            <div class="alert alert-primary" role="alert">
+                This auction has been closed by the owner and there is no winner.
             </div>
         {% elif user.is_anonymous %}
             <div>

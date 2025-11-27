@@ -266,9 +266,9 @@ def bid(request, listing_id):
 def close(request):
     """Close a listing auction by its owner.
 
-    Marks the listing as inactive and assigns the user with the most
-    recent bid as the winner. Updates the database accordingly and
-    provides a success or error message to the user.
+    Marks the listing as inactive. Assigns the user with the most
+    recent bid as the winner if it exists. Updates the database
+    accordingly and provides a success or error message to the user.
 
     :param request: The HTTP request object.
     :type request: HttpRequest
@@ -292,7 +292,11 @@ def close(request):
         listing.is_active = False
         listing.save()
         messages.success(request, "Auction closed successfully")
-    except (IntegrityError, Bid.DoesNotExist):
+    except Bid.DoesNotExist:
+        listing.is_active = False
+        listing.save()
+        messages.success(request, "Auction closed successfully")
+    except IntegrityError:
         messages.error(request, "Auction could not be closed")
     
     return HttpResponseRedirect(reverse("listing", args=[listing_id]))
