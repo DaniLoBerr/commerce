@@ -8,7 +8,7 @@
 
     {% if listing.is_active and not user.is_anonymous %}
         <div class="watchlist mb-2">
-            <form action="{% url 'watchlist' %}" method="get">
+            <form action="{% url 'watchlist_toggle' %}" method="get">
                 <input type="hidden" name="user_id" value="{{ user.id }}">
                 <input type="hidden" name="listing_id" value="{{ listing.id }}">
                 {% if user.is_authenticated and watchlist %}

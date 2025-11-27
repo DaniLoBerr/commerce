@@ -1,0 +1,41 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>{{ user.username }}'s Watchlist</h2>
+
+    {% for listing in listings %}
+        <a class="link-underline link-underline-opacity-0" href="{% url 'listing' listing.listing.id %}">
+            <div class="card listing mb-3">
+                <div class="row h-100 g-0">
+                    <figure class="col-4 h-100 p-0 m-0 bg-secondary-subtle text-secondary-emphasis">
+                        <img
+                            alt="Image of {{ listing.listing.title }}"
+                            class="listing-img rounded"
+                            src="{{ listing.listing.image.url }}"
+                        >
+                    </figure>
+                    <div class="col-8 h-100 p-0 d-flex flex-column">
+                        <header class="card-header h4 p-4 text-truncate">
+                            {{ listing.listing.title }}
+                        </header>
+                        <div class="card-body p-4">
+                            <p class="fs-5 mb-4">
+                                {% if listing.listing.bids.all %}
+                                    <span class="fw-bold">Last Bid:</span> ${{ listing.listing.bids.last.value }}
+                                {% else %}
+                                    <span class="fw-bold">Price:</span> ${{ listing.listing.price }}
+                                {% endif %}
+                            </p>
+                            <p class="card-text text-truncate">{{ listing.listing.description }}</p>
+                        </div>
+                        <div class="card-footer px-4">
+                            <small class="fst-italic">Created {{ listing.listing.creation_date }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    {% empty %}
+        <p>No listings saved.</p>
+    {% endfor %}
+{% endblock %}

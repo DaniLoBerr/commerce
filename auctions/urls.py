@@ -12,5 +12,6 @@ urlpatterns = [
     path("logout", views.logout_view, name="logout"),
     path("new", views.new, name="new"),
     path("register", views.register, name="register"),
-    path("watchlist", views.watchlist, name="watchlist"),
+    path("watchlist_list", views.watchlist_list, name="watchlist_list"),
+    path("watchlist_toggle", views.watchlist_toggle, name="watchlist_toggle"),
 ]

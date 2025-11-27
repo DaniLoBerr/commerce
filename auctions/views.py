@@ -448,7 +448,21 @@ def new(request):
     })
 
 
-def watchlist(request):
+def watchlist_list(request):
+    """Render the user's watchlist page displaying all their saved
+    listings.
+    
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :return: The HttpResponse containing the rendered watchlist page.
+    :rtype: HttpResponse
+    """
+    return render(request, "auctions/watchlist.html", {
+        "listings": Watchlist.objects.filter(user=request.user)
+    })
+
+
+def watchlist_toggle(request):
     """Add or remove a listing from a user's watchlist
     
     Handle request to add or remove listings from a user's watchlist
