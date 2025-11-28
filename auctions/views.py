@@ -449,16 +449,26 @@ def new(request):
 
 
 def watchlist_list(request):
-    """Render the user's watchlist page displaying all their saved
-    listings.
+    """Render the user's watchlist page.
     
+    Retrieves all listings saved in the user's watchlist and filters out
+    inactive listings before rendering the watchlist template.
+
     :param request: The HTTP request object.
     :type request: HttpRequest
     :return: The HttpResponse containing the rendered watchlist page.
     :rtype: HttpResponse
     """
+    # Retrieve all watchlist entries for the current user
+    listings = Watchlist.objects.filter(user=request.user)
+
+    # Filter only the listings that are currently active
+    active_listings = [
+        listing for listing in listings if listing.listing.is_active
+    ]
+
     return render(request, "auctions/watchlist.html", {
-        "listings": Watchlist.objects.filter(user=request.user)
+        "listings": active_listings
     })
 
 
