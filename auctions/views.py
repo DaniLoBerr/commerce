@@ -263,6 +263,19 @@ def bid(request, listing_id):
     return HttpResponseRedirect(reverse("listing", args=[listing_id]))
 
 
+def categories_list(request):
+    """Render the categories page showing all active categories list.
+
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :return: The HttpResponse containing the rendered categories page.
+    :rtype: HttpResponse
+    """
+    return render(request, "auctions/categories_list.html", {
+        "categories": Category.objects.all()
+    })
+
+
 def close(request):
     """Close a listing auction by its owner.
 

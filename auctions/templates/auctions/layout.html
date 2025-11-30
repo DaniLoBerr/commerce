@@ -42,6 +42,11 @@
                 </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'categories_list' %}">
+                            Categories
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{% url 'watchlist_list' %}">
                             Watchlist
                         </a>
