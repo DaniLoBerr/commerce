@@ -5,7 +5,10 @@
 
     {% for category in categories %}
         <div class="list-group">
-            <a class="list-group-item list-group-item-action list-group-item-info mb-2" href="#">{{ category.name }}</a>
+            <a
+                class="list-group-item list-group-item-action list-group-item-info mb-2"
+                href="{% url 'category_page' category.name %}"
+            >{{ category.name }}</a>
         </div>
     {% empty %}
         <p>No categories available.</p>

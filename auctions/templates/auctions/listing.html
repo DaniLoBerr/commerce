@@ -67,7 +67,10 @@
     <div class="details mb-2">
         <h4>Details</h4>
         <ul>
-            <li><span class="fw-bold">Category:</span> {{ listing.category }}</li>
+            <li>
+                <span class="fw-bold">Category:</span>
+                <a class="text-decoration-none" href="{% url 'category_page' listing.category %}">{{ listing.category }}</a>
+            </li>
             <li><span class="fw-bold">Created:</span> {{ listing.creation_date }}</li>
             <li><span class="fw-bold">Listed by:</span> {{ listing.owner }}</li>
         </ul>

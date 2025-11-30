@@ -276,6 +276,24 @@ def categories_list(request):
     })
 
 
+def category_page(request, category_name):
+    """Render a specific category page showing all related listings.
+
+    :param request: The HTTP request object.
+    :type request: HttpRequest
+    :param category_name: The category page to display.
+    :type category_name: str
+    :return: The HttpResponse containing the specific category page.
+    :rtype: HttpResponse
+    """
+    return render(request, "auctions/category.html", {
+        "listings": Listing.objects.filter(
+            category=Category.objects.get(name=category_name)
+        ),
+        "category_name": category_name,
+    })
+
+
 def close(request):
     """Close a listing auction by its owner.
 
