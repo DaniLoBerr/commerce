@@ -2,14 +2,14 @@
 
 {% block body %}
 
-    <h2>Login</h2>
+    <h2 class="mb-4">Login</h2>
 
-    <form action="{% url 'login' %}" method="post">
+    <form action="{% url 'login' %}" class="mb-2" method="post">
         {% csrf_token %}
-        <div class="form-group">
+        <div class="form-group mb-2">
             <input autofocus class="form-control" type="text" name="username" placeholder="Username">
         </div>
-        <div class="form-group">
+        <div class="form-group mb-2">
             <input class="form-control" type="password" name="password" placeholder="Password">
         </div>
         <input class="btn btn-primary" type="submit" value="Login">
