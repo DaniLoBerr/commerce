@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Prefetch
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
@@ -245,7 +246,9 @@ def index(request):
     :rtype: HttpResponse
     """
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.prefetch_related("bids").all()
+        "listings": Listing.objects.prefetch_related(
+            Prefetch("bids", queryset=Bid.objects.order_by("value"))
+        ).all()
     })
 
 
@@ -444,10 +447,10 @@ def listing(request, id):
     listing = Listing.objects.get(pk=id)
     listing_bids = Bid.objects.filter(listing_id=id)
     
-    # Retrieve the value of the last listing bid or the listing price if
+    # Retrieve the value of the biggest listing bid or the listing price if
     # It has no related bids
     try:
-        last_bid = listing_bids.latest("datetime").value
+        last_bid = listing_bids.order_by("value").last().value
     except Bid.DoesNotExist:
         last_bid = listing.price
 
