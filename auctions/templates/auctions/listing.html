@@ -43,7 +43,7 @@
             </div>
         {% elif user.is_anonymous %}
             <div>
-                <a href="{% url 'login' %}">Log in</a> to place a bid. No account? <a href="{% url 'register' %}">Register</a>.
+                <a class="text-decoration-none" href="{% url 'login' %}">Log in</a> to place a bid. No account? <a class="text-decoration-none" href="{% url 'register' %}">Register</a>.
             </div>
         {% elif user == listing.owner %}
             <form action="{% url 'close' %}" method="get">
@@ -81,7 +81,7 @@
         <div class="new-comment mb-2">
             {% if user.is_anonymous %}
                 <div>
-                    <a href="{% url 'login' %}">Log in</a> to place a comment. No account? <a href="{% url 'register' %}">Register</a>.
+                    <a class="text-decoration-none" href="{% url 'login' %}">Log in</a> to place a comment. No account? <a class="text-decoration-none" href="{% url 'register' %}">Register</a>.
                 </div>
             {% else %}
                 <form action="{% url 'comment' listing.id %}" method="post">
