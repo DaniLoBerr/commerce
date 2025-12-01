@@ -446,12 +446,12 @@ def listing(request, id):
     # Retrieve the selected listing object and all its related bids
     listing = Listing.objects.get(pk=id)
     listing_bids = Bid.objects.filter(listing_id=id)
-    
-    # Retrieve the value of the biggest listing bid or the listing price if
-    # It has no related bids
-    try:
-        last_bid = listing_bids.order_by("value").last().value
-    except Bid.DoesNotExist:
+
+    # Get the last bid for the listing if one exists
+    last_bid_obj = listing_bids.order_by("value").last()
+    if last_bid_obj is not None:
+        last_bid = last_bid_obj.value
+    else:
         last_bid = listing.price
 
     return render(request, "auctions/listing.html", {
