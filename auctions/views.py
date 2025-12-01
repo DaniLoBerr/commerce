@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from .models import *
@@ -86,6 +86,52 @@ class NewListingForm(forms.Form):
 
 
 # Auth
+def login_required(view):
+    """Decorator to ensure that a user is authenticated before accessing
+    the view.
+
+    If the user is not authenticated, it adds an error message using
+    Django's messages framework and redirects the user to the login
+    page, preserving the original requested URL to redirect back after
+    successful login.
+
+    :param view: The original view function to be decorated.
+    :type view: function
+    :return: The wrapped view function that performs the authentication
+        check.
+    :rtype: function
+    """
+    def _wrapped_view(request, *args, **kwargs):
+        """Wrapper function around the original view to enforce login
+        requirement.
+
+        Checks if the user associated with the request is authenticated.
+        If not, adds an error message and redirects to the login page
+        with a "next" query parameter pointing to the originally
+        requested URL.
+
+        :param request: The HTTP request object.
+        :type request: django.http.HttpRequest
+        :param args: Positional arguments passed to the original view.
+        :param kwargs: Keyword arguments passed to the original view.
+        :return: The original view's HTTP response if authenticated,
+            otherwise a redirect.
+        :rtype: django.http.HttpResponse
+        """
+        if not request.user.is_authenticated:
+            # Adds an error message to be displayed to the user
+            messages.error(
+                request, "You must be authenticated to perform this action."
+            )
+            login_url = reverse("login")
+            # Redirect to login URL with next parameter to return after login
+            return redirect(f"{login_url}?next={request.path}")
+
+        return view(request, *args, **kwargs)
+
+    return _wrapped_view
+
+
 def login_view(request):
     """Handle user login.
     
@@ -124,6 +170,7 @@ def login_view(request):
     return render(request, "auctions/login.html")
 
 
+@login_required
 def logout_view(request):
     """Handle user logout.
     
@@ -202,6 +249,7 @@ def index(request):
     })
 
 
+@login_required
 def bid(request, listing_id):
     """Handle placing a new bid to a specific listing.
     
@@ -294,6 +342,7 @@ def category_page(request, category_name):
     })
 
 
+@login_required
 def close(request):
     """Close a listing auction by its owner.
 
@@ -333,6 +382,7 @@ def close(request):
     return HttpResponseRedirect(reverse("listing", args=[listing_id]))
 
 
+@login_required
 def comment(request, listing_id):
     """Handle placing a new comment to a specific listing.
     
@@ -415,6 +465,7 @@ def listing(request, id):
     })
 
 
+@login_required
 def new(request):
     """Handle creation of new auction listings.
 
@@ -479,6 +530,7 @@ def new(request):
     })
 
 
+@login_required
 def watchlist_list(request):
     """Render the user's watchlist page.
     
@@ -503,6 +555,7 @@ def watchlist_list(request):
     })
 
 
+@login_required
 def watchlist_toggle(request):
     """Add or remove a listing from a user's watchlist
     
